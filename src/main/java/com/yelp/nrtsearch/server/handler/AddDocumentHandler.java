@@ -435,7 +435,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
             // we will only be getting the fields that need to be updated
             Map<String, MultiValuedField> docValueFields =
                 getDocValueFields(addDocumentRequest, partialUpdateFields);
-            idField = addDocumentRequest.getFieldsMap().get(idFieldDef.getName()).getValue(0).toString();
+            idField = addDocumentRequest.getFieldsMap().get(idFieldDef.get().getName()).getValue(0).toString();
             addDocumentRequest =
                 AddDocumentRequest.newBuilder().putAllFields(docValueFields).build();
           }
