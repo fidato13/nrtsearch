@@ -426,6 +426,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
           boolean partialUpdate = isPartialUpdate(addDocumentRequest);
           logger.info("trn indexState: {}", indexState);
           logger.info("trn indexState.getIdFieldDef(): {}", indexState.getIdFieldDef());
+          logger.info("trn indexState.getIdFieldDef().get().getName(): {}", indexState.getIdFieldDef().get().getName());
           logger.info("trn partialUpdateFields: {}", partialUpdateFields);
           logger.info("trn addDocumentRequest : {}", addDocumentRequest);
           logger.info("trn addDocumentRequestgetFieldsMap() : {}", addDocumentRequest.getFieldsMap());
