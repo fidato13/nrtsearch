@@ -424,11 +424,11 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
         for (AddDocumentRequest addDocumentRequest : addDocumentRequestList) {
           final Set<String> partialUpdateFields = getPartialUpdateFields(addDocumentRequest);
           boolean partialUpdate = isPartialUpdate(addDocumentRequest);
-          Logger.info("trn indexState: {}", indexState);
-          Logger.info("trn indexState.getIdFieldDef(): {}", indexState.getIdFieldDef());
-          Logger.info("trn partialUpdateFields: {}", partialUpdateFields);
-          Logger.info("trn addDocumentRequest : {}", addDocumentRequest);
-          Logger.info("trn addDocumentRequestgetFieldsMap() : {}", addDocumentRequest.getFieldsMap());
+          logger.info("trn indexState: {}", indexState);
+          logger.info("trn indexState.getIdFieldDef(): {}", indexState.getIdFieldDef());
+          logger.info("trn partialUpdateFields: {}", partialUpdateFields);
+          logger.info("trn addDocumentRequest : {}", addDocumentRequest);
+          logger.info("trn addDocumentRequestgetFieldsMap() : {}", addDocumentRequest.getFieldsMap());
           if (partialUpdate) {
             // removing all fields except rtb fields for the POC , for the actual implementation
             // we will only be getting the fields that need to be updated
