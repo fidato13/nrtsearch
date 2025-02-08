@@ -33,14 +33,8 @@ import io.grpc.Context;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -254,8 +248,19 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
   }
 
   private static boolean isPartialUpdate(AddDocumentRequest addDocumentRequest) {
-    boolean isPartialupdate = addDocumentRequest.getFieldsMap().containsKey("ALLOW_PARTIAL_UPDATE");
+    boolean isPartialupdate = addDocumentRequest.getFieldsMap().containsKey("_is_partial_update");
     return isPartialupdate;
+  }
+
+  private static Set<String> getPartialUpdateFields(AddDocumentRequest addDocumentRequest) {
+    Set<String> partialUpdateFields = new HashSet<>();
+    if (isPartialUpdate(addDocumentRequest)) {
+      MultiValuedField field = addDocumentRequest.getFieldsMap().get("_partial_update_fields");
+      if (field != null) {
+        partialUpdateFields.addAll(field.getValueList());
+      }
+    }
+    return partialUpdateFields;
   }
 
   /**
@@ -403,7 +408,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
     public long runIndexingJob() throws Exception {
       DeadlineUtils.checkDeadline("DocumentIndexer: runIndexingJob", "INDEXING");
 
-      logger.debug(
+      logger.info(
           String.format(
               "running indexing job on threadId: %s",
               Thread.currentThread().getName() + Thread.currentThread().threadId()));
@@ -411,21 +416,20 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
       IndexState indexState;
       ShardState shardState;
       IdFieldDef idFieldDef;
-      String ad_bid_id = "";
-      Set<String> partialUpdateFields =
-          Set.of("ad_bid_floor", "ad_bid_floor_USD", "ad_bid_value", "ad_bid_value_USD");
+      String idField = "";
       try {
         indexState = globalState.getIndexOrThrow(this.indexName);
         shardState = indexState.getShard(0);
         idFieldDef = indexState.getIdFieldDef().orElse(null);
         for (AddDocumentRequest addDocumentRequest : addDocumentRequestList) {
+          final Set<String> partialUpdateFields = getPartialUpdateFields(addDocumentRequest);
           boolean partialUpdate = isPartialUpdate(addDocumentRequest);
           if (partialUpdate) {
             // removing all fields except rtb fields for the POC , for the actual implementation
             // we will only be getting the fields that need to be updated
             Map<String, MultiValuedField> docValueFields =
                 getDocValueFields(addDocumentRequest, partialUpdateFields);
-            ad_bid_id = addDocumentRequest.getFieldsMap().get("ad_bid_id").getValue(0);
+            idField = addDocumentRequest.getFieldsMap().get(idFieldDef.getName()).getValue(0).toString();
             addDocumentRequest =
                 AddDocumentRequest.newBuilder().putAllFields(docValueFields).build();
           }
@@ -467,11 +471,11 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
             }
           } else {
             if (partialUpdate) {
-              Term term = new Term(idFieldDef.getName(), ad_bid_id);
+              Term term = new Term(idFieldDef.getName(), idField);
               // executing the partial update
-              logger.debug(
-                  "running a partial update for the ad_bid_id: {} and fields {} in the thread {}",
-                  ad_bid_id,
+              logger.info(
+                  "running a partial update for the idField: {} and fields {} in the thread {}",
+                  idField,
                   partialUpdateDocValueFields,
                   Thread.currentThread().getName() + Thread.currentThread().threadId());
 
