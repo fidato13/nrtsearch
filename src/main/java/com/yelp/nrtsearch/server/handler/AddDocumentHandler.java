@@ -260,6 +260,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
         partialUpdateFields.addAll(field.getValueList());
       }
     }
+    logger.info("trn : in method getPartialUpdateFields partialUpdateFields: {}", partialUpdateFields);
     return partialUpdateFields;
   }
 
@@ -453,6 +454,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
                 documentsContext.getRootDocument().getFields().stream()
                     .filter(f -> partialUpdateFields.contains(f.name()))
                     .toList();
+            logger.info("trn : partialUpdateDocValueFields: {}", partialUpdateDocValueFields);
           }
 
           if (documentsContext.hasNested()) {
