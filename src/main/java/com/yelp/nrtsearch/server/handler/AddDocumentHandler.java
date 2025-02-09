@@ -436,6 +436,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
             // we will only be getting the fields that need to be updated
             Map<String, MultiValuedField> docValueFields =
                 getDocValueFields(addDocumentRequest, partialUpdateFields);
+            logger.info("trn : docValueFields: {}", docValueFields);
             idField = addDocumentRequest.getFieldsMap().get(idFieldDef.getName()).getValue(0).toString();
             addDocumentRequest =
                 AddDocumentRequest.newBuilder().putAllFields(docValueFields).build();
@@ -522,6 +523,8 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
 
     private static Map<String, MultiValuedField> getDocValueFields(
         AddDocumentRequest addDocumentRequest, Set<String> partialUpdateFields) {
+      logger.info("trn : passed partialUpdateFields: {}", partialUpdateFields);
+      logger.info("trn : partialUpdateFields is of type {}", partialUpdateFields.getClass().getName());
       Map<String, MultiValuedField> docValueFields =
           addDocumentRequest.getFieldsMap().entrySet().stream()
               .filter(e -> partialUpdateFields.contains(e.getKey()))
