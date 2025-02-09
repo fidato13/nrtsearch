@@ -248,9 +248,8 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
   }
 
   private static boolean isPartialUpdate(AddDocumentRequest addDocumentRequest) {
-    boolean isPartialUpdate = addDocumentRequest.getFieldsMap().containsKey("_is_partial_update") &&
+    return addDocumentRequest.getFieldsMap().containsKey("_is_partial_update") &&
             Boolean.parseBoolean(addDocumentRequest.getFieldsMap().get("_is_partial_update").getValue(0));
-    return isPartialupdate;
   }
 
   private static Set<String> getPartialUpdateFields(AddDocumentRequest addDocumentRequest) {
