@@ -261,7 +261,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
         partialUpdateFields.addAll(field.getValueList());
       }
     }
-    logger.info("trn : in method getPartialUpdateFields partialUpdateFields: {}", partialUpdateFields);
+    logger.info("trn : in method getPartialUpdateFields partialUpdateFields.iterator().next(): {}", partialUpdateFields.iterator().next());
     return partialUpdateFields;
   }
 
