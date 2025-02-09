@@ -256,6 +256,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
     Set<String> partialUpdateFields = new HashSet<>();
     if (isPartialUpdate(addDocumentRequest)) {
       MultiValuedField field = addDocumentRequest.getFieldsMap().get("_partial_update_fields");
+      logger.info("trn : in method getPartialUpdateFields field.getValueList(): {}", field.getValueList());
       if (field != null) {
         partialUpdateFields.addAll(field.getValueList());
       }
