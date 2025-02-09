@@ -258,7 +258,14 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
       MultiValuedField field = addDocumentRequest.getFieldsMap().get("_partial_update_fields");
       logger.info("trn : in method getPartialUpdateFields field.getValueList(): {}", field.getValueList());
       if (field != null) {
-        partialUpdateFields.addAll(field.getValueList());
+        // For some weird reasons, the passed hashset from Elasticpipe like [inactive] , is coming literally as "[inactive]"
+        // and not as [inactive]. Which means that the beginning [ and ending ] are part of the string, whereas they should
+        // otherwise represent the hashset/list of items. So, we need to remove the first and last character from the string
+        List<String> cleansedValues = field.getValueList().stream()
+                .map(value -> value.substring(1, value.length() - 1))
+                .collect(Collectors.toList());
+        logger.info("trn : in method getPartialUpdateFields cleansedValues: {}", cleansedValues);
+        partialUpdateFields.addAll(cleansedValues);
       }
       logger.info("trn : in method getPartialUpdateFields partialUpdateFields.iterator().next(): {}", partialUpdateFields.iterator().next());
     }
