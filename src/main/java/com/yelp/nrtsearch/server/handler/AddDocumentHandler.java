@@ -496,6 +496,8 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
                   partialUpdateDocValueFields,
                   Thread.currentThread().getName() + Thread.currentThread().threadId());
 
+
+              logger.info("trn : partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType().docValuesType(): {}", partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType().docValuesType());
               shardState.writer.updateDocValues(term, partialUpdateDocValueFields.toArray(new Field[0]));
             } else {
               documents.add(documentsContext.getRootDocument());
