@@ -269,6 +269,9 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
       }
       logger.info("trn : in method getPartialUpdateFields partialUpdateFields.iterator().next(): {}", partialUpdateFields.iterator().next());
     }
+    // This is strictly for acceptance testing, we will remove this in the actual implementation for PoC and further
+    partialUpdateFields.add("_is_partial_update");
+    partialUpdateFields.add("_partial_update_fields");
     return partialUpdateFields;
   }
 
