@@ -555,11 +555,12 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
       Map<String, MultiValuedField> docValueFields =
               addDocumentRequest.getFieldsMap().entrySet().stream()
                       .filter(e -> {
+                        logger.info("trn : Checking if entry: {} with key: {} is present in partialUpdateFields: {} with the statement partialUpdateFields.contains(e.getKey()) : {}", e, e.getKey(), partialUpdateFields, partialUpdateFields.contains(e.getKey()));
                         boolean isPresent = partialUpdateFields.contains(e.getKey());
                         if (!isPresent) {
-                          logger.info("trn : Filtering out entry: {}", e);
+                          logger.info("trn : Filtering out entry: {} with key: {} ", e, e.getKey());
                         } else {
-                            logger.info("trn : Keeping entry: {}", e);
+                            logger.info("trn : Keeping entry: {} with key: {} ", e, e.getKey());
                         }
                         return isPresent;
                       })
