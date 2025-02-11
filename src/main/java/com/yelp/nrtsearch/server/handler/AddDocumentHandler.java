@@ -546,10 +546,25 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
       logger.info("trn : passed partialUpdateFields: {}", partialUpdateFields);
       logger.info("trn : partialUpdateFields is of type {}", partialUpdateFields.getClass().getName());
       logger.info("trn : addDocumentRequest.getFieldsMap(): {}", addDocumentRequest.getFieldsMap());
+      logger.info("trn : addDocumentRequest.getFieldsMap().entrySet(): {}", addDocumentRequest.getFieldsMap().entrySet());
+//      Map<String, MultiValuedField> docValueFields =
+//          addDocumentRequest.getFieldsMap().entrySet().stream()
+//              .filter(e -> partialUpdateFields.contains(e.getKey()))
+//              .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
       Map<String, MultiValuedField> docValueFields =
-          addDocumentRequest.getFieldsMap().entrySet().stream()
-              .filter(e -> partialUpdateFields.contains(e.getKey()))
-              .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+              addDocumentRequest.getFieldsMap().entrySet().stream()
+                      .filter(e -> {
+                        boolean isPresent = partialUpdateFields.contains(e.getKey());
+                        if (!isPresent) {
+                          logger.info("trn : Filtering out entry: {}", e);
+                        } else {
+                            logger.info("trn : Keeping entry: {}", e);
+                        }
+                        return isPresent;
+                      })
+                      .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
       logger.info("trn : docValueFields: {}", docValueFields);
       return docValueFields;
     }
