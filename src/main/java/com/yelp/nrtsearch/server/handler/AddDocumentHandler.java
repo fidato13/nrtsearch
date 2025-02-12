@@ -272,6 +272,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
                     return Stream.of(value);
                   }
                 })
+                .map(String::trim) // Trim each element
                 .collect(Collectors.toList());
         cleansedValues.forEach(value -> logger.info("Element in cleansedValues : '{}'", value));
         logger.info("trn : in method getPartialUpdateFields cleansedValues: {}", cleansedValues);
