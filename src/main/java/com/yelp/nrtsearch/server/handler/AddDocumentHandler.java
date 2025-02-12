@@ -264,6 +264,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
         // and not as [inactive]. Which means that the beginning [ and ending ] are part of the string, whereas they should
         // otherwise represent the hashset/list of items. So, we need to remove the first and last character from the string
         List<String> cleansedValues = field.getValueList().stream()
+                .map(value -> value.substring(1, value.length() - 1)) // Remove enclosing brackets
                 .flatMap(value -> {
                   if (value.contains(",")) {
                     return Arrays.stream(value.split(","));
@@ -271,7 +272,6 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
                     return Stream.of(value);
                   }
                 })
-                .map(value -> value.substring(1, value.length() - 1))
                 .collect(Collectors.toList());
         cleansedValues.forEach(value -> logger.info("Element in cleansedValues : '{}'", value));
         logger.info("trn : in method getPartialUpdateFields cleansedValues: {}", cleansedValues);
