@@ -544,6 +544,8 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
     private static Map<String, MultiValuedField> getDocValueFields(
         AddDocumentRequest addDocumentRequest, Set<String> partialUpdateFieldsSet) {
       logger.info("trn : passed partialUpdateFieldsSet: {}", partialUpdateFieldsSet);
+      partialUpdateFieldsSet.forEach(field -> logger.info("Element in partialUpdateFieldsSet: '{}'", field));
+
       logger.info("trn : partialUpdateFieldsSet is of type {}", partialUpdateFieldsSet.getClass().getName());
       logger.info("trn : addDocumentRequest.getFieldsMap(): {}", addDocumentRequest.getFieldsMap());
       logger.info("trn : addDocumentRequest.getFieldsMap().entrySet(): {}", addDocumentRequest.getFieldsMap().entrySet());
