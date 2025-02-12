@@ -542,9 +542,9 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
     }
 
     private static Map<String, MultiValuedField> getDocValueFields(
-        AddDocumentRequest addDocumentRequest, Set<String> partialUpdateFields) {
-      logger.info("trn : passed partialUpdateFields: {}", partialUpdateFields);
-      logger.info("trn : partialUpdateFields is of type {}", partialUpdateFields.getClass().getName());
+        AddDocumentRequest addDocumentRequest, Set<String> partialUpdateFieldsSet) {
+      logger.info("trn : passed partialUpdateFieldsSet: {}", partialUpdateFieldsSet);
+      logger.info("trn : partialUpdateFieldsSet is of type {}", partialUpdateFieldsSet.getClass().getName());
       logger.info("trn : addDocumentRequest.getFieldsMap(): {}", addDocumentRequest.getFieldsMap());
       logger.info("trn : addDocumentRequest.getFieldsMap().entrySet(): {}", addDocumentRequest.getFieldsMap().entrySet());
 //      Map<String, MultiValuedField> docValueFields =
@@ -555,8 +555,8 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
       Map<String, MultiValuedField> docValueFields =
               addDocumentRequest.getFieldsMap().entrySet().stream()
                       .filter(e -> {
-                        logger.info("trn : Checking if entry: {} with key: {} is present in partialUpdateFields: {} with the statement partialUpdateFields.contains(e.getKey()) : {}", e, e.getKey(), partialUpdateFields, partialUpdateFields.contains(e.getKey()));
-                        boolean isPresent = partialUpdateFields.contains(e.getKey());
+                        logger.info("trn : Checking if entry: {} with key: {} is present in partialUpdateFieldsSet: {} with the statement partialUpdateFieldsSet.contains(e.getKey()) : {}", e, e.getKey(), partialUpdateFieldsSet, partialUpdateFieldsSet.contains(e.getKey()));
+                        boolean isPresent = partialUpdateFieldsSet.contains(e.getKey());
                         if (!isPresent) {
                           logger.info("trn : Filtering out entry: {} with key: {} ", e, e.getKey());
                         } else {
