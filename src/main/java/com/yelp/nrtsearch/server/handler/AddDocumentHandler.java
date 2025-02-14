@@ -54,6 +54,13 @@ import org.slf4j.LoggerFactory;
 
 public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentResponse> {
   private static final Logger logger = LoggerFactory.getLogger(AddDocumentHandler.class);
+  // the following two fields are used to identify partial update requests only for PoC as otherwise in the actual implementation
+  // we will have the elasticpipe construct and send the partial request. As of now, since the clientlib is not ready
+  // with the partial update request, we are using this field to identify the partial update request inside addDocumentRequest
+  // and then invoking the partial update logic(endpoint method).
+  private static final String PARTIAL_UPDATE_KEY = "_is_partial_update";
+  private static final String PARTIAL_UPDATE_FIELDS = "_partial_update_fields";
+
 
   public AddDocumentHandler(GlobalState globalState) {
     super(globalState);
@@ -250,15 +257,15 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
   }
 
   private static boolean isPartialUpdate(AddDocumentRequest addDocumentRequest) {
-    return addDocumentRequest.getFieldsMap().containsKey("_is_partial_update") &&
-            Boolean.parseBoolean(addDocumentRequest.getFieldsMap().get("_is_partial_update").getValue(0));
+    return addDocumentRequest.getFieldsMap().containsKey(PARTIAL_UPDATE_KEY) &&
+            Boolean.parseBoolean(addDocumentRequest.getFieldsMap().get(PARTIAL_UPDATE_KEY).getValue(0));
   }
 
   private static Set<String> getPartialUpdateFields(AddDocumentRequest addDocumentRequest) {
     Set<String> partialUpdateFields = new HashSet<>();
     if (isPartialUpdate(addDocumentRequest)) {
-      MultiValuedField field = addDocumentRequest.getFieldsMap().get("_partial_update_fields");
-      logger.info("trn : in method getPartialUpdateFields field.getValueList(): {}", field.getValueList());
+      MultiValuedField field = addDocumentRequest.getFieldsMap().get(PARTIAL_UPDATE_FIELDS);
+//      logger.info("trn : in method getPartialUpdateFields field.getValueList(): {}", field.getValueList());
       if (field != null) {
         // For some weird reasons, the passed hashset from Elasticpipe like [inactive] , is coming literally as "[inactive]"
         // and not as [inactive]. Which means that the beginning [ and ending ] are part of the string, whereas they should
@@ -274,14 +281,14 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
                 })
                 .map(String::trim) // Trim each element
                 .collect(Collectors.toList());
-        cleansedValues.forEach(value -> logger.info("Element in cleansedValues : '{}'", value));
-        logger.info("trn : in method getPartialUpdateFields cleansedValues: {}", cleansedValues);
+//        cleansedValues.forEach(value -> logger.info("Element in cleansedValues : '{}'", value));
+//        logger.info("trn : in method getPartialUpdateFields cleansedValues: {}", cleansedValues);
         partialUpdateFields.addAll(cleansedValues);
       }
-      logger.info("trn : in method getPartialUpdateFields partialUpdateFields.iterator().next(): {}", partialUpdateFields.iterator().next());
+//      logger.info("trn : in method getPartialUpdateFields partialUpdateFields.iterator().next(): {}", partialUpdateFields.iterator().next());
     }
     // This is strictly for acceptance testing, we will remove this in the actual implementation for PoC and further
-    partialUpdateFields.add("_is_partial_update");
+//    partialUpdateFields.add(PARTIAL_UPDATE_KEY);
     // This following field _partial_update_fields, since it is a multi-valued field, it is coming as a list of strings , which is not allowed in partial update values doc method
     //    partialUpdateFields.add("_partial_update_fields");
     return partialUpdateFields;
@@ -432,7 +439,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
     public long runIndexingJob() throws Exception {
       DeadlineUtils.checkDeadline("DocumentIndexer: runIndexingJob", "INDEXING");
 
-      logger.info(
+      logger.debug(
           String.format(
               "running indexing job on threadId: %s",
               Thread.currentThread().getName() + Thread.currentThread().threadId()));
@@ -448,18 +455,18 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
         for (AddDocumentRequest addDocumentRequest : addDocumentRequestList) {
           final Set<String> partialUpdateFields = getPartialUpdateFields(addDocumentRequest);
           boolean partialUpdate = isPartialUpdate(addDocumentRequest);
-          logger.info("trn indexState: {}", indexState);
-          logger.info("trn indexState.getIdFieldDef(): {}", indexState.getIdFieldDef());
-          logger.info("trn indexState.getIdFieldDef().get().getName(): {}", indexState.getIdFieldDef().get().getName());
-          logger.info("trn partialUpdateFields: {}", partialUpdateFields);
-          logger.info("trn addDocumentRequest : {}", addDocumentRequest);
-          logger.info("trn addDocumentRequestgetFieldsMap() : {}", addDocumentRequest.getFieldsMap());
+//          logger.info("trn indexState: {}", indexState);
+//          logger.info("trn indexState.getIdFieldDef(): {}", indexState.getIdFieldDef());
+//          logger.info("trn indexState.getIdFieldDef().get().getName(): {}", indexState.getIdFieldDef().get().getName());
+//          logger.info("trn partialUpdateFields: {}", partialUpdateFields);
+//          logger.info("trn addDocumentRequest : {}", addDocumentRequest);
+//          logger.info("trn addDocumentRequestgetFieldsMap() : {}", addDocumentRequest.getFieldsMap());
           if (partialUpdate) {
             // removing all fields except rtb fields for the POC , for the actual implementation
             // we will only be getting the fields that need to be updated
             Map<String, MultiValuedField> docValueFields =
                 getDocValueFields(addDocumentRequest, partialUpdateFields);
-            logger.info("trn : docValueFields: {}", docValueFields);
+//            logger.info("trn : docValueFields: {}", docValueFields);
             idField = addDocumentRequest.getFieldsMap().get(idFieldDef.getName()).getValue(0).toString();
             addDocumentRequest =
                 AddDocumentRequest.newBuilder().putAllFields(docValueFields).build();
@@ -478,7 +485,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
                 documentsContext.getRootDocument().getFields().stream()
                     .filter(f -> partialUpdateFields.contains(f.name()))
                     .toList();
-            logger.info("trn : partialUpdateDocValueFields: {}", partialUpdateDocValueFields);
+//            logger.info("trn : partialUpdateDocValueFields: {}", partialUpdateDocValueFields);
           }
 
           if (documentsContext.hasNested()) {
@@ -507,14 +514,14 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
               Term term = new Term(idFieldDef.getName(), idField);
               CustomIndexingMetrics.updateDocValuesRequestsReceived.labelValues(indexName).inc();
               // executing the partial update
-              logger.info(
-                  "running a partial update for the idField: {} and fields {} in the thread {}",
-                  idField,
-                  partialUpdateDocValueFields,
-                  Thread.currentThread().getName() + Thread.currentThread().threadId());
+//              logger.info(
+//                  "running a partial update for the idField: {} and fields {} in the thread {}",
+//                  idField,
+//                  partialUpdateDocValueFields,
+//                  Thread.currentThread().getName() + Thread.currentThread().threadId());
 
-              logger.info("trn : partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType(): {}", partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType());
-              logger.info("trn : partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType().docValuesType(): {}", partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType().docValuesType());
+//              logger.info("trn : partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType(): {}", partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType());
+//              logger.info("trn : partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType().docValuesType(): {}", partialUpdateDocValueFields.toArray(new Field[0])[0].fieldType().docValuesType());
               shardState.writer.updateDocValues(term, partialUpdateDocValueFields.toArray(new Field[0]));
               long nanoTime = System.nanoTime();
               CustomIndexingMetrics.updateDocValuesLatency
@@ -554,12 +561,12 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
 
     private static Map<String, MultiValuedField> getDocValueFields(
         AddDocumentRequest addDocumentRequest, Set<String> partialUpdateFieldsSet) {
-      logger.info("trn : passed partialUpdateFieldsSet: {}", partialUpdateFieldsSet);
+//      logger.info("trn : passed partialUpdateFieldsSet: {}", partialUpdateFieldsSet);
       partialUpdateFieldsSet.forEach(field -> logger.info("Element in partialUpdateFieldsSet: '{}'", field));
 
-      logger.info("trn : partialUpdateFieldsSet is of type {}", partialUpdateFieldsSet.getClass().getName());
-      logger.info("trn : addDocumentRequest.getFieldsMap(): {}", addDocumentRequest.getFieldsMap());
-      logger.info("trn : addDocumentRequest.getFieldsMap().entrySet(): {}", addDocumentRequest.getFieldsMap().entrySet());
+//      logger.info("trn : partialUpdateFieldsSet is of type {}", partialUpdateFieldsSet.getClass().getName());
+//      logger.info("trn : addDocumentRequest.getFieldsMap(): {}", addDocumentRequest.getFieldsMap());
+//      logger.info("trn : addDocumentRequest.getFieldsMap().entrySet(): {}", addDocumentRequest.getFieldsMap().entrySet());
 //      Map<String, MultiValuedField> docValueFields =
 //          addDocumentRequest.getFieldsMap().entrySet().stream()
 //              .filter(e -> partialUpdateFields.contains(e.getKey()))
@@ -568,18 +575,18 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
       Map<String, MultiValuedField> docValueFields =
               addDocumentRequest.getFieldsMap().entrySet().stream()
                       .filter(e -> {
-                        logger.info("trn : Checking if entry: {} with key: {} is present in partialUpdateFieldsSet: {} with the statement partialUpdateFieldsSet.contains(e.getKey()) : {}", e, e.getKey(), partialUpdateFieldsSet, partialUpdateFieldsSet.contains(e.getKey()));
+//                        logger.info("trn : Checking if entry: {} with key: {} is present in partialUpdateFieldsSet: {} with the statement partialUpdateFieldsSet.contains(e.getKey()) : {}", e, e.getKey(), partialUpdateFieldsSet, partialUpdateFieldsSet.contains(e.getKey()));
                         boolean isPresent = partialUpdateFieldsSet.contains(e.getKey());
                         if (!isPresent) {
-                          logger.info("trn : Filtering out entry: {} with key: {} ", e, e.getKey());
+//                          logger.info("trn : Filtering out entry: {} with key: {} ", e, e.getKey());
                         } else {
-                            logger.info("trn : Keeping entry: {} with key: {} ", e, e.getKey());
+//                            logger.info("trn : Keeping entry: {} with key: {} ", e, e.getKey());
                         }
                         return isPresent;
                       })
                       .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
-      logger.info("trn : docValueFields: {}", docValueFields);
+//      logger.info("trn : docValueFields: {}", docValueFields);
       return docValueFields;
     }
 
