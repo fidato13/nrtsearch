@@ -288,7 +288,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
 //      logger.info("trn : in method getPartialUpdateFields partialUpdateFields.iterator().next(): {}", partialUpdateFields.iterator().next());
     }
     // This is strictly for acceptance testing, we will remove this in the actual implementation for PoC and further
-//    partialUpdateFields.add(PARTIAL_UPDATE_KEY);
+    partialUpdateFields.add(PARTIAL_UPDATE_KEY);
     // This following field _partial_update_fields, since it is a multi-valued field, it is coming as a list of strings , which is not allowed in partial update values doc method
     //    partialUpdateFields.add("_partial_update_fields");
     return partialUpdateFields;
