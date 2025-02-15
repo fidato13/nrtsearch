@@ -449,7 +449,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
           final Set<String> partialUpdateFields = getPartialUpdateFields(addDocumentRequest);
           boolean partialUpdate = isPartialUpdate(addDocumentRequest);
           idField = addDocumentRequest.getFieldsMap().get(idFieldDef.getName()).getValue(0).toString();
-          // comment this , if it is acceptance test, as we don't want to remove the fields for the acceptance test
+          // comment the following , if it is acceptance test, as we don't want to remove the fields for the acceptance test
           // (because they are indexed in nrtsearch for debugging purposes)
           addDocumentRequest =
                   AddDocumentRequest.newBuilder(addDocumentRequest)
@@ -470,7 +470,7 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
             partialUpdateDocValueFields =
                 documentsContext.getRootDocument().getFields().stream()
                     .filter(f -> partialUpdateFields.contains(f.name()))
-                        // Comment out the following lines if it is acceptance test,
+                        // Comment the following lines if it is acceptance test,
                         // as we don't want to remove the fields for the acceptance test because
                         // they are indexed in nrtsearch for debugging purposes
                         .filter(f -> !f.name().equalsIgnoreCase(PARTIAL_UPDATE_FIELDS))
