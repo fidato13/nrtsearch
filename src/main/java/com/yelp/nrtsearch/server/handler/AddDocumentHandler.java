@@ -539,37 +539,6 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
       return shardState.writer.getMaxCompletedSequenceNumber();
     }
 
-//    private static Map<String, MultiValuedField> getDocValueFields(
-//        AddDocumentRequest addDocumentRequest, Set<String> partialUpdateFieldsSet) {
-////      logger.info("trn : passed partialUpdateFieldsSet: {}", partialUpdateFieldsSet);
-//      partialUpdateFieldsSet.forEach(field -> logger.info("Element in partialUpdateFieldsSet: '{}'", field));
-//
-////      logger.info("trn : partialUpdateFieldsSet is of type {}", partialUpdateFieldsSet.getClass().getName());
-////      logger.info("trn : addDocumentRequest.getFieldsMap(): {}", addDocumentRequest.getFieldsMap());
-////      logger.info("trn : addDocumentRequest.getFieldsMap().entrySet(): {}", addDocumentRequest.getFieldsMap().entrySet());
-////      Map<String, MultiValuedField> docValueFields =
-////          addDocumentRequest.getFieldsMap().entrySet().stream()
-////              .filter(e -> partialUpdateFields.contains(e.getKey()))
-////              .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-//
-//      Map<String, MultiValuedField> docValueFields =
-//              addDocumentRequest.getFieldsMap().entrySet().stream()
-//                      .filter(e -> {
-////                        logger.info("trn : Checking if entry: {} with key: {} is present in partialUpdateFieldsSet: {} with the statement partialUpdateFieldsSet.contains(e.getKey()) : {}", e, e.getKey(), partialUpdateFieldsSet, partialUpdateFieldsSet.contains(e.getKey()));
-//                        boolean isPresent = partialUpdateFieldsSet.contains(e.getKey());
-//                        if (!isPresent) {
-////                          logger.info("trn : Filtering out entry: {} with key: {} ", e, e.getKey());
-//                        } else {
-////                            logger.info("trn : Keeping entry: {} with key: {} ", e, e.getKey());
-//                        }
-//                        return isPresent;
-//                      })
-//                      .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-//
-////      logger.info("trn : docValueFields: {}", docValueFields);
-//      return docValueFields;
-//    }
-
     /**
      * update documents with nested objects
      *
