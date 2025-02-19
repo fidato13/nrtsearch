@@ -452,13 +452,13 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
 
           // comment the following , if it is acceptance test, as we don't want to remove the fields for the acceptance test
           // (because they are indexed in nrtsearch for debugging purposes)
-//          if (partialUpdate) {
-//            addDocumentRequest =
-//                AddDocumentRequest.newBuilder(addDocumentRequest)
-//                    .removeFields(PARTIAL_UPDATE_KEY)
-//                    .removeFields(PARTIAL_UPDATE_FIELDS)
-//                    .build();
-//          }
+          if (partialUpdate) {
+            addDocumentRequest =
+                AddDocumentRequest.newBuilder(addDocumentRequest)
+                    .removeFields(PARTIAL_UPDATE_KEY)
+                    .removeFields(PARTIAL_UPDATE_FIELDS)
+                    .build();
+          }
           DocumentsContext documentsContext =
               AddDocumentHandler.LuceneDocumentBuilder.getDocumentsContext(
                   addDocumentRequest, indexState);
@@ -475,8 +475,8 @@ public class AddDocumentHandler extends Handler<AddDocumentRequest, AddDocumentR
                         // Comment the following lines if it is acceptance test,
                         // as we don't want to remove the fields for the acceptance test because
                         // they are indexed in nrtsearch for debugging purposes
-//                        .filter(f -> !f.name().equalsIgnoreCase(PARTIAL_UPDATE_FIELDS))
-//                        .filter(f -> !f.name().equalsIgnoreCase(PARTIAL_UPDATE_KEY))
+                        .filter(f -> !f.name().equalsIgnoreCase(PARTIAL_UPDATE_FIELDS))
+                        .filter(f -> !f.name().equalsIgnoreCase(PARTIAL_UPDATE_KEY))
                         .toList();
           }
 
